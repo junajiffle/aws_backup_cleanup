@@ -2,7 +2,7 @@
 
 The ultimate goal of this script is to take the backup of an ec2 instance and to delete older AMI including snapshots associated with it...
 
-**list of the permissions needed for the IAM role.**
+**List of the permissions needed for the IAM role.**
 ```
 For ec2 instance:
 
@@ -15,7 +15,7 @@ DescribeImages            List
 DeleteSnapshot            Write
 DeregisterImage           Write
 
-For ELB instance:
+For ELB:
 
 Actions                                Access level
 
@@ -33,7 +33,7 @@ DescribeLoadBalancerAttributes         Read
 4) Add the node back to the load balancer.
 5) Remove the old backups and AMIs along with the EBS volume snapshots that are no longer needed.
 
-We need to pass an argument while executing the script. If argument value is primary, then the complete action will be performed on primary nodes or if it is "secondary" then the action will be carried out on secondary region.
+First of all,we need to pass an argument while executing the script. If the argument passed is primary, then the complete action will be performed on primary nodes or if it is "secondary" then the action will be carried out on the secondary region.
 
 **1.Remove a node from the load balancer.**
 
@@ -44,7 +44,7 @@ We can get the list of instances attached to the Lb using the command "aws elb d
 #Get the number of instances attached to LB
 instances_id=($(aws elb describe-load-balancers --load-balancer-name $lb  --query LoadBalancerDescriptions[].Instances[].InstanceId  --output=text))
 ```
-Before proceeding to deregister AMI from LB. Script will check for the number of instances attached to the LB. If it is zero the script will exit saying "No instances attached to LB".
+Before proceeding to deregister AMI from LB. We need to check the number of instances attached to the LB. If it is zero the script will exit saying "No instances attached to LB".
 
 *Command:*
 ```
@@ -55,7 +55,8 @@ then
   exit 1
 fi
 ```
-Before proceeding with the backup proccess. We need to collect some metadata of the instance for which backup is bieng taken, such as Instance name, Instance IP so that we can use these values throughout the script.
+Before proceeding with the backup proccess. We need to collect some metadata of the instance for which backup is being taken, such as Instance name, Instance IP etc.. so that we can use these values throughout the script.
+
 *Command:*
 ```
 instanceip=($(aws ec2 describe-instances --region=$region --instance-ids $instance --query Reservations[].Instances[].PublicIpAddress --output=text))
@@ -63,7 +64,7 @@ instance_pvip=($(aws ec2 describe-instances --region=$region --instance-ids $ins
 inst_name=($(aws ec2 describe-instances --region=$region  --instance-ids $instance --query 'Reservations[].Instances[].Tags[?Key==`Name`].Value[]' --output=text))
 ```
 
-Now,if the instance count is non-zero then the script proceeds to deregister instance from LB.
+Now,if the instance count is non-zero, then the script proceeds to deregister instance from LB.
 
 *Command:*
 ```
@@ -112,12 +113,13 @@ Backup process completed....
 ```
 **3.Update and reboot the machine. Wait for the node "/testall" endpoint to return "OK".**
 
-Now we need to reboot the instance. We can use "aws ec2 reboot-instances" for rebooting an instance. 
+Now we need to reboot the instance. We can use "aws ec2 reboot-instances" for rebooting an instance.
+
 *Command:*
 ```
 aws ec2 reboot-instances --region=$region --instance-ids $instance
 ```
-We need to check the application status on regular interval to get the "200 OK" message. Initialize a variable with value say, 15 and use curl to check the status till the count reaches 15. In between if we get "200 OK" status then exit the loop and continue with the next step.
+We need to check the application status on regular interval to get "200 OK" message. Initialize a variable with value say, 15 and use curl to check the status till the count reaches 15. In between if we get "200 OK" status then exit the loop and continue with the next step.
 
 *Command:*
 ```
@@ -165,7 +167,7 @@ Adding target back to LB
     ]
 }
 ```
-Now the maintenance activity is completed for the first instance. Since we are performing it in a loop. The same actions will be carried out for the other instances attached to the LB.
+Now the backup has been taken for the first instance. Since we are performing it in a loop. The same actions will be carried out for the other instances attached to the LB.
 
 **5.Remove the old backups and AMIs along with the EBS volume snapshots that are no longer needed.**
 
