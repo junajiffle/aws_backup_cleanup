@@ -1,0 +1,103 @@
+Removing node a0-3 from the load balancer.
+Instance ID of a0-3 : i-02f49c362d2001568
+INSTANCES	i-0fbeee24a8cb7b59f
+INSTANCES	i-047c82da7df050d1e
+Checking the application status
+Application returned status : 200
+Application is UP
+Creating backup for i-02f49c362d2001568 
+Creating AMI with reboot :
+Created AMI : AMI-a0-3-19Sep18
+AMI ID is  : ami-0d532b21d3f3d5d93
+Backup process completed....
+Procceding to reboot instance a0-3
+Application is still not up.. HTTP status: 500
+Application is still not up.. HTTP status: 500
+Application is still not up.. HTTP status: 500
+Got 200. All Good!
+Adding a0-3 back to LB
+{
+    "Instances": [
+        {
+            "InstanceId": "i-0fbeee24a8cb7b59f"
+        },
+        {
+            "InstanceId": "i-02f49c362d2001568"
+        },
+        {
+            "InstanceId": "i-047c82da7df050d1e"
+        }
+    ]
+}
+Maintenance completed for a0-3
+Removing node a0-1 from the load balancer.
+Instance ID of a0-1 : i-047c82da7df050d1e
+INSTANCES	i-0fbeee24a8cb7b59f
+INSTANCES	i-02f49c362d2001568
+Checking the application status
+Application returned status : 200
+Application is UP
+Creating backup for i-047c82da7df050d1e 
+Creating AMI with reboot :
+Created AMI : AMI-a0-1-19Sep18
+AMI ID is  : ami-0b9c5c91fdd3fa88b
+Backup process completed....
+Procceding to reboot instance a0-1
+Application is still not up.. HTTP status: 500
+Application is still not up.. HTTP status: 500
+Got 200. All Good!
+Adding a0-1 back to LB
+{
+    "Instances": [
+        {
+            "InstanceId": "i-0fbeee24a8cb7b59f"
+        },
+        {
+            "InstanceId": "i-02f49c362d2001568"
+        },
+        {
+            "InstanceId": "i-047c82da7df050d1e"
+        }
+    ]
+}
+Maintenance completed for a0-1
+Removing node a0-2 from the load balancer.
+Instance ID of a0-2 : i-0fbeee24a8cb7b59f
+INSTANCES	i-02f49c362d2001568
+INSTANCES	i-047c82da7df050d1e
+Checking the application status
+Application returned status : 200
+Application is UP
+Creating backup for i-0fbeee24a8cb7b59f 
+Creating AMI with reboot :
+Created AMI : AMI-a0-2-19Sep18
+AMI ID is  : ami-007398a4c471d255c
+Backup process completed....
+Procceding to reboot instance a0-2
+Application is still not up.. HTTP status: 500
+Application is still not up.. HTTP status: 500
+Got 200. All Good!
+Adding a0-2 back to LB
+{
+    "Instances": [
+        {
+            "InstanceId": "i-0fbeee24a8cb7b59f"
+        },
+        {
+            "InstanceId": "i-02f49c362d2001568"
+        },
+        {
+            "InstanceId": "i-047c82da7df050d1e"
+        }
+    ]
+}
+Maintenance completed for a0-2
+Fetching AMI details ....
+Following AMI older than 1 day : ami-0016cb2a9658bc582
+Image Name : test6-i-02f49c362d2001568-18Sep18
+Image CreationDate : 2018-09-18
+Following are the snapshots associated with it : snap-094c76b22ff491122 snap-07e58cfdfe6566644
+Starting the Deregister of AMI...
+Deleting the associated snapshots....
+Image ami-007398a4c471d255c is created today
+Image ami-0290af90892e0dd45 is created today
