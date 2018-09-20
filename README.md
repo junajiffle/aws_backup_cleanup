@@ -86,20 +86,27 @@ curl -s -I https://config.appliance-trial.com/testall | head -1 | awk {' print $
 ```
 **2.Create an AMI from the node (with reboot for primary and without reboot for secondary).**
 
-Next is to create an AMI for the instance which has been taken out of LB now. If this is a node in primary environment, AMI should be created with reboot. By default, Amazon EC2 attempts to shut down and reboot the instance before creating the image. You can use --no-reboot for secondary environment to eliminate the restart.
+Next is to create an AMI for the instance which has been taken out of LB now. If this is a node in primary environment, AMI should be created with reboot. By default, Amazon EC2 attempts to shut down and reboot the instance before creating the image. You can use --no-reboot for secondary environment to eliminate the restart. The exit status of the AMI creation is captured and the process fails if exit status is non-zer0.
 
 *Command:*
 ```
+echo "Creating backup for $instance"
+exit_status=1
 if [ $env == primary ]
 then
-  echo "Creating AMI with reboot"
-  aws ec2 create-image --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text
+  echo "Creating AMI with reboot :"
+  aws ec2 create-image --region=$region --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text >/tmp/aminate.txt 2>> /dev/null && exit_status=$?;
 elif [ $env == secondary ]
   then
-  echo "Creating AMI without reboot"
-  aws ec2 create-image --no-reboot --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text
+  echo "Creating AMI without reboot :"
+  aws ec2 create-image --region=$region --no-reboot --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text >/tmp/aminate.txt 2>> /dev/null && exit_status=$?;
 else
   echo "No region $env found"
+  exit 1
+fi
+if [ $exit_status -gt 0 ]
+then
+  echo "Failed to create AMI"
   exit 1
 fi
 ```

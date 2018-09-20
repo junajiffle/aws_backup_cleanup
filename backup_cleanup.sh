@@ -21,42 +21,45 @@ instance_pvip=($(aws ec2 describe-instances --region=$region --instance-ids $ins
 inst_name=($(aws ec2 describe-instances --region=$region  --instance-ids $instance --query 'Reservations[].Instances[].Tags[?Key==`Name`].Value[]' --output=text))
 counter=0
 
-#removing target from ami
-echo "Removing node $inst_name from the load balancer."
-echo "Instance ID of $inst_name : $instance"
+#removing target from LB
+echo "Removing instance $inst_name : $instance from the load balancer."
 aws elb deregister-instances-from-load-balancer --region=us-west-2 --load-balancer-name $lb --instances $instance --output=text
-sleep 10
 echo "Checking the application status"
 response=`curl -s -I https://config.appliance-trial.com/testall | head -1 | awk {' print $2 '}`
-echo "Application returned status : $response"
 if [[ "$response" == "200" ]]
   then
-    echo "Application is UP"
+    echo "Application is up return status : $response"
 else
-    echo "Application is DOWN"
+    echo "Application is down return status : $response"
     exit 1
 fi
-ami="$inst_name-`date +%d%b%y`"
 
 #creating AMI for the instance
+ami="$inst_name-`date -u +%s`"
 echo "Creating backup for $instance"
+exit_status=1
 if [ $env == primary ]
 then
   echo "Creating AMI with reboot :"
-  aws ec2 create-image --region=$region --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text >/tmp/aminate.txt
+  aws ec2 create-image --region=$region --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text >/tmp/aminate.txt 2>> /dev/null && exit_status=$?;
 elif [ $env == secondary ]
   then
   echo "Creating AMI without reboot :"
-  aws ec2 create-image --region=$region --no-reboot --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text >/tmp/aminate.txt
+  aws ec2 create-image --region=$region --no-reboot --instance-id $instance --name "$ami" --description "Automated backup created for $instance" --output=text >/tmp/aminate.txt 2>> /dev/null && exit_status=$?;
 else
   echo "No region $env found"
   exit 1
 fi
- for i in `cat /tmp/aminate.txt`; do
-  ami_nm=($(aws ec2 describe-images --region=$region --owners=201973737062 --image-ids=$i --query Images[].Name --output=text))
- echo "Created AMI : $ami_nm"
- echo  "AMI ID is  : $i"
- done
+if [ $exit_status -gt 0 ]
+then
+  echo "Failed to create AMI"
+  exit 1
+fi
+
+for i in `cat /tmp/aminate.txt`; do
+ ami_nm=($(aws ec2 describe-images --region=$region --owners=201973737062 --image-ids=$i --query Images[].Name --output=text))
+ echo "Created AMI : $ami_nm | AMI ID is  : $i"
+done
 echo "Backup process completed...."
 #starting system reboot
 
