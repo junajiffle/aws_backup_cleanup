@@ -63,9 +63,9 @@ done
 echo "Backup process completed...."
 #starting system reboot
 
-echo "Procceding to reboot instance "$inst_name""
-aws ec2 reboot-instances --region=$region --instance-ids $instance
-sleep 90
+#echo "Procceding to reboot instance "$inst_name""
+#aws ec2 reboot-instances --region=$region --instance-ids $instance
+#sleep 90
 status=500
 until [ $status -eq 200 ]; do
     echo "Application is still not up.. HTTP status: $status"
